@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "rd-doc-form-client-side-solution",
+    "id": "bfaa71b6-fe54-4c63-8952-dc4df878cbc4",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.20.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "rd-doc-form description"
+      },
+      "longDescription": {
+        "default": "rd-doc-form description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "rd-doc-form Feature",
+        "description": "The feature that activates elements of the rd-doc-form solution.",
+        "id": "e8f99e51-b8ea-422b-ae7a-a6fc7042dce6",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/rd-doc-form.sppkg"
+  }
+}

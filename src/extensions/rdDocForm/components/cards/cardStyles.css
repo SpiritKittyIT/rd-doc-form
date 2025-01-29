@@ -1,0 +1,24 @@
+.card {
+  display: flex;
+  padding: 0.5rem;
+  flex-flow: column;
+  width: calc(100% - 1rem);
+}
+
+.card-label {
+  font-weight: 500;
+  padding: 0.3rem 0;
+}
+
+.card-required:after {
+  content:" *";
+  color: red;
+}
+
+.card-error {
+  color: red;
+  height: 1.17rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
