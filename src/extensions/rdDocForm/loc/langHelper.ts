@@ -17,6 +17,9 @@ export interface ILang{
     CanNotLower: string
     CanNotHigher: string
   }
+  DataDisplays: {
+    DragNDropUpload: string
+  }
   Form: {
     DialogTitleError: string
     DisplaySubmitError: string
@@ -31,8 +34,6 @@ export interface ILang{
 
 export const getLangStrings = (locale: string): ILang => {
   switch (locale) {
-    case 'en':
-      return require(/* webpackChunkName: 'lang' */'./en.json')
     case 'sk':
       return require(/* webpackChunkName: 'lang' */'./sk.json')
     default:

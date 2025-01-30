@@ -1,6 +1,9 @@
-import * as React from 'react';
+import * as React from 'react'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material'
-import RdDocForm, { IRdDocFormProps } from './RdDocForm';
+import RdDocForm, { IRdDocFormProps } from './RdDocForm'
+
+import './styles.css'
+import './cards/cardStyles.css'
 
 const ThemeProviderWrapper: React.FC<IRdDocFormProps> = (props) => {
   const themeOptions: ThemeOptions = {
@@ -25,6 +28,6 @@ const ThemeProviderWrapper: React.FC<IRdDocFormProps> = (props) => {
       <RdDocForm {...props}/>
     </ThemeProvider>
   )
-};
+}
 
 export default ThemeProviderWrapper

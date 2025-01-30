@@ -4,46 +4,47 @@
   "https": true,
   "serveConfigurations": {
     "default": {
-      "pageUrl": "https://{tenantDomain}/_layouts/15/SPListForm.aspx",
+      "pageUrl": "https://servisac.sharepoint.com/sites/acRdDokumenty/_layouts/15/SPListForm.aspx",
       "formCustomizer": {
         "componentId": "70d19e70-0632-41b8-a02c-d5e7f42a600e",
-        "PageType": 8,
-        "RootFolder": "/sites/mySite/Lists/MyList",
+        "PageType": 6,
+        "RootFolder": "/sites/acRdDokumenty/acLibRozpracovane/Forms",
+        "ID": 12,
         "properties": {
           "sampleText": "Value"
         }
       }
     },
     "rdDocForm_NewForm": {
-      "pageUrl": "https://{tenantDomain}/_layouts/15/SPListForm.aspx",
+      "pageUrl": "https://servisac.sharepoint.com/sites/acRdDokumenty/_layouts/15/SPListForm.aspx",
       "formCustomizer": {
         "componentId": "70d19e70-0632-41b8-a02c-d5e7f42a600e",
         "PageType": 8,
-        "RootFolder": "/sites/mySite/Lists/MyList",
+        "RootFolder": "/sites/acRdDokumenty/acLibRozpracovane/Forms",
         "properties": {
           "sampleText": "Value"
         }
       }
     },
     "rdDocForm_EditForm": {
-      "pageUrl": "https://{tenantDomain}/_layouts/15/SPListForm.aspx",
+      "pageUrl": "https://servisac.sharepoint.com/sites/acRdDokumenty/_layouts/15/SPListForm.aspx",
       "formCustomizer": {
         "componentId": "70d19e70-0632-41b8-a02c-d5e7f42a600e",
         "PageType": 6,
-        "RootFolder": "/sites/mySite/Lists/MyList",
-        "ID": 1,
+        "RootFolder": "/sites/acRdDokumenty/acLibRozpracovane/Forms",
+        "ID": 12,
         "properties": {
           "sampleText": "Value"
         }
       }
     },
     "rdDocForm_ViewForm": {
-      "pageUrl": "https://{tenantDomain}/_layouts/15/SPListForm.aspx",
+      "pageUrl": "https://servisac.sharepoint.com/sites/acRdDokumenty/_layouts/15/SPListForm.aspx",
       "formCustomizer": {
         "componentId": "70d19e70-0632-41b8-a02c-d5e7f42a600e",
         "PageType": 4,
-        "RootFolder": "/sites/mySite/Lists/MyList",
-        "ID": 1,
+        "RootFolder": "/sites/acRdDokumenty/acLibRozpracovane/Forms",
+        "ID": 12,
         "properties": {
           "sampleText": "Value"
         }

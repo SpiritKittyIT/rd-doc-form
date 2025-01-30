@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
+import * as React from 'react'
+import { Box, Typography } from '@mui/material'
 
 export interface ITabProps {
   id: string
@@ -24,7 +24,7 @@ export function TabPanel(props: TabPanelProps): JSX.Element {
 
   return (
     <div
-      role="tabpanel"
+      role='tabpanel'
       hidden={value !== index}
       id={`form-tabpanel-${index}`}
       aria-labelledby={`form-tab-${index}`}

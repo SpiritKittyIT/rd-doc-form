@@ -17,6 +17,9 @@
     "CanNotLower": "nemôže byť menšia než",
     "CanNotHigher": "nemôže byť väčšia než"
   },
+  "DataDisplays": {
+    "DragNDropUpload": "Potiahnite súbory, alebo stlačte pre nahratie"
+  },
   "Form": {
     "DialogTitleError": "Vyskytly sa chyby počas odosielania formuláru:",
     "DisplaySubmitError": "Nemôžete odoslať formulár v móde zobrazenia.",

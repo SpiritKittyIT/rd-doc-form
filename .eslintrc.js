@@ -129,8 +129,9 @@ module.exports = {
         // RATIONALE:         This rule warns if setters are defined without getters, which is probably a mistake.
         'accessor-pairs': 1,
         // RATIONALE:         In TypeScript, if you write x["y"] instead of x.y, it disables type checking.
+        // FUCK YOUR RATIONALE
         'dot-notation': [
-          1,
+          0,
           {
             'allowPattern': '^_'
           }

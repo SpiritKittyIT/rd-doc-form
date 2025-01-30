@@ -5,14 +5,14 @@
     "rd-doc-form-form-customizer": {
       "components": [
         {
-          "entrypoint": "./lib/extensions/rdDocForm/RdDocFormFormCustomizer.js",
-          "manifest": "./src/extensions/rdDocForm/RdDocFormFormCustomizer.manifest.json"
+          "entrypoint": "./lib/extensions/rdDocForm/RdDocFormCustomizer.js",
+          "manifest": "./src/extensions/rdDocForm/RdDocFormCustomizer.manifest.json"
         }
       ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "RdDocFormFormCustomizerStrings": "lib/extensions/rdDocForm/loc/{locale}.js"
+    "RdDocFormCustomizerStrings": "lib/extensions/rdDocForm/loc/{locale}.js"
   }
 }

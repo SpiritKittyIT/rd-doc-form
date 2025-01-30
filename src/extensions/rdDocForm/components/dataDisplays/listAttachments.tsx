@@ -1,15 +1,19 @@
 import * as React from 'react'
 import { FC } from 'react'
 
-import { ListView, IViewField } from "@pnp/spfx-controls-react/lib/ListView"
-import { IColumn } from 'office-ui-fabric-react'
-import { CloseIcon } from '@fluentui/react-icons-northstar'
-import { Button } from '@mui/material'
+import { Box, IconButton, List, ListItem, ListItemIcon, ListItemText, Paper } from '@mui/material'
 import { SPFI } from '@pnp/sp'
-import { PrilohyListId } from '../formTemplates'
-import { Contains } from '../../help/helperFunctions'
 
 import "@pnp/sp/items/get-all"
+import { LocaleStrings, PrilohyListId } from '../RdDocForm'
+import { useDropzone } from 'react-dropzone'
+import { IFileInfo } from '@pnp/sp/files'
+
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"; // Default icon
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"; // PDF icon
+import ImageIcon from "@mui/icons-material/Image"; // Image icon
+import DescriptionIcon from "@mui/icons-material/Description"; // Document icon
+import DeleteIcon from "@mui/icons-material/Close"; // Close (delete) icon
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -18,67 +22,39 @@ interface IListAttachmentsProps {
   itemId: number
   itemState: string
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>
-  setShow: React.Dispatch<React.SetStateAction<boolean>>
-  pocetPrilohHandle: IHandle<number>
-  mainListId: string
+  setDialog: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const ListAttachments: FC<IListAttachmentsProps> = (props) => {
-  const [Prilohy, SetPrilohy] = React.useState<any[]>([])
+  const [attachments, setAttachments] = React.useState<IFileInfo[]>([])
 
-  const updateProlohyCount = (count: number): void => {
-    props.pocetPrilohHandle.setValue(count)
-    props.sp.web.lists.getById(props.mainListId)
-    .items.getById(props.itemId)
-    .update({['acColPocetPriloh']: count})
-    .then(() => {return})
-    .catch((error) => {
-      console.error(error)
-    })
-  }
-
-  const updatePrilohy = (updateCount: boolean = true): void => {
-    props.sp.web.lists.getById(PrilohyListId)()
-    .then((list) => {
-      props.sp.web.getFolderByServerRelativePath(`${list.EntityTypeName}/${props.itemId}`).files.select('*').orderBy('Name')()
-      .then((files) => {
-        const oldCount = Prilohy.length
-        if (updateCount && oldCount !== files.length){
-          updateProlohyCount(files.length)
-        }
-        SetPrilohy(files)
-      }).catch((error) => {
-        console.error(error)
-      })
+  const getAttachments = (): void => {
+    props.sp.web.lists.getById(PrilohyListId).rootFolder.folders.getByUrl(`${props.itemId}`).files()
+    .then((files) => {
+      setAttachments(files)
     }).catch((error) => {
       console.error(error)
     })
   }
 
-  const onDrop = async (files: File[]): Promise<void> => {
+  React.useEffect(() => {
+    getAttachments()
+  }, [])
+
+  // Handle file drop
+  const onDrop = React.useCallback(async (files) => {
     for (const file of files) {
       await props.sp.web.lists.getById(PrilohyListId)
       .rootFolder.folders.getByUrl(`${props.itemId}`).files.getByUrl(file.name)().then((file) => {
         // found pre existing file
         props.setErrorMessage(`Súbor ${file.Name} už existuje ako príloha pre tento dokument. Pre to ho nie je možné pridať.`)
-        props.setShow(true)
+        props.setDialog(true)
       }, async (reason) => {
         // no existing file with same name
         console.log(reason)
         await props.sp.web.lists.getById(PrilohyListId)
           .rootFolder.folders.getByUrl(`${props.itemId}`).files.addChunked(file.name, file, undefined, true)
           .then(async (fileItem) => {
-            await fileItem.file.getItem().then(async (fileListItem) => {
-              await fileListItem.update({
-                ['acColDokumentID']: props.itemId
-              }).then(() => {
-                updatePrilohy(false)
-              }).catch((error) => {
-                console.error(error)
-              })
-            }).catch((error) => {
-              console.error(error)
-            })
           }).catch((error) => {
             console.error(error)
           })
@@ -86,77 +62,89 @@ const ListAttachments: FC<IListAttachmentsProps> = (props) => {
         console.error(error)
       })
     }
-    updatePrilohy()
-  }
+    
+    getAttachments()
+  }, [])
 
-  const onRemove = (item: any): void => {
-    props.sp.web.getFileById(item['UniqueId']).recycle()
+  const removeAttachment = (attachment: IFileInfo): void => {
+    props.sp.web.getFileById(attachment.UniqueId).recycle()
     .then(() => {
-      updatePrilohy()
     }).catch((error) => {
       console.error(error)
     })
+    setAttachments((prevFiles) => prevFiles.filter((file) => file.UniqueId !== attachment.UniqueId));
+  };
+
+  // Function to get icon based on file type
+  const getFileIcon = (fileName: string): JSX.Element => {
+    const extension = fileName.split(".").pop()?.toLowerCase()
+    switch (extension) {
+      case "pdf":
+        return <PictureAsPdfIcon sx={{ color: "red" }} />
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
+        return <ImageIcon sx={{ color: "green" }} />
+      case "doc":
+      case "docx":
+        return <DescriptionIcon sx={{ color: "blue" }} />
+      case "xls":
+      case "xlsx":
+        return <DescriptionIcon sx={{ color: "green" }} />
+      default:
+        return <InsertDriveFileIcon />;
+    }
   }
 
-  const viewFields: IViewField[] = [
-    {
-      name: 'Name',
-      displayName: 'File Name',
-      sorting: true,
-      maxWidth: 400,
-      render: (item?: any, index?: number, column?: IColumn) => {
-        return (
-          <>
-            <a href={`https://tatravagonkask.sharepoint.com${item['ServerRelativeUrl']}`}>{item['Name']}</a>
-          </>
-        )
-      }
-    },
-    {
-      name: '',
-      maxWidth: 50,
-      render: (item?: any, index?: number, column?: IColumn) => {
-        return (
-          <>
-            {
-              !Contains(['Spúšťa sa pripomienkovanie...',  'Spúšťa sa schvaľovanie...', 'V schvaľovaní', 'Schválený'], props.itemState) &&
-              <a className='list-button' onClick={() => {onRemove(item)}}><div className='icon'><CloseIcon /></div></a>
-            }
-          </>
-        )
-      }
-    }
-  ]
+  // Handle click on a file to open its URL
+  const handleClickItem = (attachment: IFileInfo): void => {
+    console.log(attachment)
+    window.open(`${attachment['odata.id'].split('/sites')[0]}${attachment.ServerRelativeUrl}`, "_blank"); // Opens the file URL in a new tab
+  }
 
-  React.useEffect(() => {
-    updatePrilohy()
-  }, [props.itemId])
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
     <>
-      <Button
-        variant='contained'
-        size='small'
-        color='warning'
-        disabled={Contains(['Spúšťa sa schvaľovanie...', 'V schvaľovaní', 'Schválený'], props.itemState)}>
-          <label htmlFor='FileInput' className='pointer'>Pridať súbory</label>
-          <input type='file' id='FileInput' multiple hidden onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            onDrop(Array.from(event.target.files))
-            .catch((error) => {
-              console.error(error)
-            })
-          }} />
-      </Button>
-      <ListView
-        items={Prilohy}
-        viewFields={viewFields}
-        iconFieldName='LinkingUrl'
-        compact={true}
-        dragDropFiles={true}
-        onDrop={onDrop}
-        stickyHeader={true}
-        className='attachments-wrapper'
-      />
+      <Paper sx={{ padding: 3, maxWidth: 500, margin: "auto", textAlign: "center" }}>
+        {/* Drag & Drop Input */}
+        <Box
+          {...getRootProps()}
+          sx={{
+            border: "2px dashed gray",
+            padding: 3,
+            cursor: "pointer",
+          }}
+        >
+          <input {...getInputProps()} />
+          {LocaleStrings.DataDisplays.DragNDropUpload}
+        </Box>
+
+        {/* File List */}
+        <List sx={{ marginTop: 2 }}>
+          {attachments.map((attachment, index) => (
+            <ListItem
+              key={attachment.Name}
+              onClick={() => handleClickItem(attachment)}
+              sx={{
+                "&:hover": {
+                  backgroundColor: "#f0f0f0", // Background color on hover
+                  cursor: "pointer", // Make it clear that it's clickable
+                },
+              }}
+              secondaryAction={
+                <IconButton edge="end" onClick={() => removeAttachment(attachment)} color="error">
+                  <DeleteIcon />
+                </IconButton>
+              }
+            >
+              <ListItemIcon>{getFileIcon(attachment.Name)}</ListItemIcon>
+              <ListItemText primary={attachment.Name} />
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
     </>
   )
 }
