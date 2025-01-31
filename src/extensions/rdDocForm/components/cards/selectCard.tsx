@@ -1,9 +1,9 @@
 import { FormDisplayMode } from '@microsoft/sp-core-library'
 import * as React from 'react'
-import { TextField } from '@mui/material'
+import { Autocomplete, TextField } from '@mui/material'
 import { LocaleStrings } from '../RdDocForm'
 
-interface ITextCard {
+interface ISelectCard {
   id: string
   fieldName: string
   item: Record<string, any>
@@ -12,10 +12,9 @@ interface ITextCard {
   displayMode: FormDisplayMode
   required?: boolean
   className?: string
-  valueVerify?: (value: string) => string
 }
 
-const TextCard: React.FC<ITextCard> = (props) => {
+const SelectCard: React.FC<ISelectCard> = (props) => {
   const [error, setError] = React.useState<boolean>(false)
   const [errorMessage, setErrorMessage] = React.useState<string>()
 
@@ -38,48 +37,47 @@ const TextCard: React.FC<ITextCard> = (props) => {
       setError(true)
       return
     }
-
-    let verifyResult = ''
-    if (props.valueVerify) {
-      verifyResult = props.valueVerify(props.item[props.fieldName])
-    }
-
-    if (verifyResult) {
-      setErrorMessage(verifyResult)
-      setError(true)
-    }
   }
 
-  const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  const onChange = (event: React.SyntheticEvent<Element, Event>, newValue: string): void => {
+    if (!event && !newValue) {return}
+    
     props.setItem({
       ...props.item,
-      [props.fieldName]: event.target.value,
+      [props.fieldName]: newValue,
     })
 
-    checkInput(event.target.value)
+    checkInput(newValue)
   }
 
   React.useEffect(() => {
-    checkInput(props.item[props.fieldName] ?? '')
+    checkInput(props.item[props.fieldName])
   }, [props.required, props.colProps])
 
   try {
     return (
-      <div className={props.className}>
-        <TextField
+      <Autocomplete
+          disablePortal
           id={props.id}
           disabled={props.displayMode === FormDisplayMode.Display}
+          options={props.colProps[props.fieldName].Choices ?? []}
           fullWidth
-          label={getTitle()}
-          variant='standard'
-          required={props.required || (props.colProps[props.fieldName] ? props.colProps[props.fieldName].Required : false)}
           value={props.item[props.fieldName]}
           onChange={onChange}
-          error={error}
-          helperText={errorMessage}
-          InputLabelProps={{ shrink: props.item[props.fieldName] ? true : false }}
+          isOptionEqualToValue={(option, value) => {
+            return option?.value === value?.value
+          }}
+          renderInput={(params) => 
+            <TextField
+              {...params}
+              label={getTitle()}
+              variant='standard'
+              required={props.required || (props.colProps[props.fieldName] ? props.colProps[props.fieldName].Required : false)}
+              error={error}
+              helperText={errorMessage}
+            />
+          }
         />
-      </div>
     )
   }
   catch (error) {
@@ -90,4 +88,4 @@ const TextCard: React.FC<ITextCard> = (props) => {
   }
 };
 
-export default TextCard;
+export default SelectCard;
