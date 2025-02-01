@@ -14,8 +14,9 @@
     "Select": "Vyberte",
     "Placeholder": "Začnite písať...",
     "ThisValue": "Táto hodnota",
-    "CanNotLower": "nemôže byť menšia než",
-    "CanNotHigher": "nemôže byť väčšia než"
+    "CanNotLower": "Nemôže byť menšia než",
+    "CanNotHigher": "Nemôže byť väčšia než",
+    "LoadingMembers": "Načítavame..."
   },
   "DataDisplays": {
     "DragNDropUpload": "Potiahnite súbory, alebo stlačte pre nahratie"

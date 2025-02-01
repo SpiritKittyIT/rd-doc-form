@@ -16,6 +16,7 @@ export interface ILang{
     ThisValue: string
     CanNotLower: string
     CanNotHigher: string
+    LoadingMembers: string
   }
   DataDisplays: {
     DragNDropUpload: string

@@ -58,7 +58,7 @@ const DateCard: React.FC<IDateCard> = (props) => {
   }
 
   const onChange = (newValue: Dayjs): void => {
-    const newDate = newValue && newValue.isValid() ? newValue.add(2, 'hour').toISOString() : ''
+    const newDate = newValue && newValue.isValid() ? newValue.toISOString() : ''
 
     props.setItem({
       ...props.item,
@@ -70,7 +70,7 @@ const DateCard: React.FC<IDateCard> = (props) => {
   }
 
   React.useEffect(() => {
-    const newDate = value && value.isValid() ? value.add(2, 'hour').toISOString() : ''
+    const newDate = value && value.isValid() ? value.toISOString() : ''
     checkInput(newDate)
   }, [props.required, props.colProps])
 

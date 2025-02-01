@@ -3,9 +3,13 @@ import * as React from 'react'
 import { Autocomplete, TextField } from '@mui/material'
 import { LocaleStrings } from '../RdDocForm'
 import { SPFI } from '@pnp/sp'
+import { FormCustomizerContext } from '@microsoft/sp-listview-extensibility'
+import { getSiteUsersAndGroups, getUserOrGroupById } from '../../help/functions'
+
 
 interface IPeopleCard {
   sp: SPFI
+  context: FormCustomizerContext
   id: string
   fieldName: string
   item: Record<string, any>
@@ -18,18 +22,16 @@ interface IPeopleCard {
   className?: string
 }
 
-interface Person {
-    id: number;
-    name: string;
-    type: "User" | "Group"
-  }
-
 const PeopleCard: React.FC<IPeopleCard> = (props) => {
   const [error, setError] = React.useState<boolean>(false)
   const [errorMessage, setErrorMessage] = React.useState<string>()
 
-  const [options, setOptions] = React.useState<Person[]>([])
-  const [selected, setSelected] = React.useState<Person | Person[] | null>(props.multiple ? [] : null)
+  const [options, setOptions] = React.useState<IMember[]>([])
+
+  const [selectedS, setSelectedS] = React.useState<IMember | null>(null)
+  const [selectedM, setSelectedM] = React.useState<IMember[]>([])
+  
+  const [filterInput, setFilterInput] = React.useState<string>('')
   const [loading, setLoading] = React.useState<boolean>(false)
 
   const getTitle = (): string => {
@@ -42,9 +44,68 @@ const PeopleCard: React.FC<IPeopleCard> = (props) => {
     return title
   }
 
-  const checkInput = (value: string): void => {
+  const setInitVals = async (): Promise<void> => {
+    if (props.item && props.item[`${props.fieldName}Id`]) {
+      if (props.multiple) {
+        const values: number[] = props.item[`${props.fieldName}Id`]
+        const initSelectedM: IMember[] = []
+        for (const value of values) {
+          const member = await getUserOrGroupById(props.sp, value)
+          if (member) {
+            initSelectedM.push(member)
+          }
+        }
+        setSelectedM(initSelectedM)
+
+
+        for (const option of options) {
+          if (option.id === props.item[`${props.fieldName}Id`]) {
+            setSelectedS(option)
+            break
+          }
+        }
+      }
+      else {
+        const member = await getUserOrGroupById(props.sp, props.item[`${props.fieldName}Id`])
+        if (member) {
+          setSelectedS(member)
+        }
+      }
+    }
+  }
+
+  const onInputChange = (event: React.SyntheticEvent<Element, Event>, newValue: string): void => {
+    setFilterInput(newValue)
+    setLoading(true)
+    getSiteUsersAndGroups(props.sp, props.context, props.multiple ?? false, newValue)
+    .then((members) => {
+      setOptions(members)
+      setLoading(false)
+    }).catch((err) => {
+      console.error(err)
+      setLoading(false)
+    })
+  }
+
+  // Set initial value from SharePoint list item
+  React.useEffect(() => {
+    setInitVals().then().catch((err) => {
+      console.error(err)
+    })
+  }, [props.fieldName, props.multiple])
+
+  const onChangeS = (event: React.SyntheticEvent<Element, Event>, newValue: IMember): void => {
+    if (!event && !newValue) {return}
+    setSelectedS(newValue)
+    
+    props.setItem({
+      ...props.item,
+      [`${props.fieldName}Id`]: newValue,
+      [`${props.fieldName}StringId`]: `${newValue}`,
+    })
+
     const required = props.required || (props.colProps[props.fieldName] ? props.colProps[props.fieldName].Required : false)
-    const missingVal = value ? false : required
+    const missingVal = newValue ? false : required
 
     if (missingVal) {
       setErrorMessage(`${LocaleStrings.Cards.PleaseFill} ${getTitle()}`)
@@ -53,104 +114,80 @@ const PeopleCard: React.FC<IPeopleCard> = (props) => {
     }
   }
 
-  async function fetchPeople(searchQuery: string = "") {
-    setLoading(true);
-    try {
-      let peopleData: Person[] = [];
-  
-      // Fetch users with OData filter
-      const users = await props.sp.web.siteUsers
-        .filter(searchQuery ? `substringof('${searchQuery}', Title)` : "")()
-  
-      peopleData = users.map((user) => ({
-        id: user.Id,
-        name: user.Title,
-        type: "User",
-      }));
-  
-      // Fetch SharePoint groups if allowed
-      if (props.allowGroups) {
-        const groups = await props.sp.web.siteGroups
-          .filter(searchQuery ? `substringof('${searchQuery}', Title)` : "")()
-  
-        const groupData: Person[] = groups.map((group) => ({
-          id: group.Id,
-          name: group.Title,
-          type: "Group",
-        }));
-  
-        peopleData = [...peopleData, ...groupData];
-      }
-  
-      setOptions(peopleData);
-    } catch (error) {
-      console.error("Error fetching users/groups:", error);
-    }
-    setLoading(false);
-  }
-  
-
-  // Fetch users and groups from SharePoint
-  React.useEffect(() => {
-    fetchPeople()
-  }, [props.allowGroups])
-
-  // Set initial value from SharePoint list item
-  React.useEffect(() => {
-    if (props.item && props.item[props.fieldName]) {
-      const initialValue = Array.isArray(props.item[props.fieldName]) ? props.item[props.fieldName] : [props.item[props.fieldName]];
-      const initialSelection = initialValue.map((person: any) => ({
-        id: person.Id,
-        name: person.Title,
-        type: person.PrincipalType === 1 ? "User" : "Group",
-      }));
-
-      setSelected(props.multiple ? initialSelection : initialSelection[0] || null);
-    }
-  }, [props.item, props.fieldName, props.multiple])
-
-  const onChange = (event: React.SyntheticEvent<Element, Event>, newValue: Person | Person[] | null): void => {
+  const onChangeM = (event: React.SyntheticEvent<Element, Event>, newValue: IMember[]): void => {
     if (!event && !newValue) {return}
+    setSelectedM(newValue)
     
     props.setItem({
       ...props.item,
-      [props.fieldName]: newValue,
+      [`${props.fieldName}Id`]: newValue.map((member) => member.id),
+      [`${props.fieldName}StringId`]: newValue.map((member) => `${member.id}`),
     })
 
-    checkInput(newValue)
-  }
+    const required = props.required || (props.colProps[props.fieldName] ? props.colProps[props.fieldName].Required : false)
+    const missingVal = newValue ? false : required
 
-  React.useEffect(() => {
-    checkInput(props.item[props.fieldName])
-  }, [props.required, props.colProps])
+    if (missingVal) {
+      setErrorMessage(`${LocaleStrings.Cards.PleaseFill} ${getTitle()}`)
+      setError(true)
+      return
+    }
+  }
 
   try {
     return (
-      <Autocomplete
-          disablePortal
-          multiple={props.multiple}
-          id={props.id}
-          disabled={props.displayMode === FormDisplayMode.Display}
-          options={options}
-          fullWidth
-          value={selected}
-          onChange={onChange}
-          {/*
-          isOptionEqualToValue={(option, value) => {
-          return option?.id === value?.id
-          }}
-            */...[]}
-          renderInput={(params) => 
-            <TextField
-              {...params}
-              label={getTitle()}
-              variant='standard'
-              required={props.required || (props.colProps[props.fieldName] ? props.colProps[props.fieldName].Required : false)}
-              error={error}
-              helperText={errorMessage}
-            />
-          }
-        />
+      props.multiple
+      ? <Autocomplete
+        disablePortal
+        multiple
+        id={props.id}
+        disabled={props.displayMode === FormDisplayMode.Display}
+        options={options}
+        getOptionLabel={(option) => option.name}
+        fullWidth
+        loading={loading}
+        loadingText={LocaleStrings.Cards.LoadingMembers}
+        value={selectedM}
+        onChange={onChangeM}
+        inputValue={filterInput}
+        onInputChange={onInputChange}
+        onOpen={() => {onInputChange(null as any, '')}}
+        renderInput={(params) => 
+          <TextField
+            {...params}
+            label={getTitle()}
+            variant='standard'
+            required={props.required || (props.colProps[props.fieldName] ? props.colProps[props.fieldName].Required : false)}
+            error={error}
+            helperText={errorMessage}
+          />
+        }
+      />
+      : <Autocomplete
+        disablePortal
+        id={props.id}
+        disabled={props.displayMode === FormDisplayMode.Display}
+        options={options}
+        getOptionLabel={(option) => option.name}
+        fullWidth
+        loading={loading}
+        loadingText={LocaleStrings.Cards.LoadingMembers}
+        value={selectedS}
+        onChange={onChangeS}
+        inputValue={filterInput}
+        onInputChange={onInputChange}
+        onOpen={() => {onInputChange(null as any, '')}}
+        renderInput={(params) => 
+          <TextField
+            {...params}
+            label={getTitle()}
+            variant='standard'
+            required={props.required || (props.colProps[props.fieldName] ? props.colProps[props.fieldName].Required : false)}
+            error={error}
+            helperText={errorMessage}
+          />
+        }
+      />
     )
   }
   catch (error) {

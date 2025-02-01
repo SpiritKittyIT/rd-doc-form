@@ -1,1 +1,5 @@
+export { default as DateCard } from './dateCard'
+export { default as NumberCard } from './numberCard'
+export { default as PeopleCard } from './peopleCard'
+export { default as SelectCard } from './selectCard'
 export { default as TextCard } from './textCard'

@@ -55,3 +55,8 @@ interface IChoice {
   value: string
   label: string
 }
+
+interface IMember {
+  id: number
+  name: string
+}
