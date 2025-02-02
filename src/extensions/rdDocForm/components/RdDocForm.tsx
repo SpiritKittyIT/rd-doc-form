@@ -19,6 +19,8 @@ import { TabPanel, tabProps } from './dataDisplays/tabPanel'
 import { DateCard, NumberCard, PeopleCard, SelectCard, TextCard } from './cards'
 import { getLangStrings, ILang } from '../loc/langHelper'
 import ListAttachments from './dataDisplays/listAttachments'
+import { ISiteUserInfo } from '@pnp/sp/site-users/types'
+import ListUlohy from './dataDisplays/listUlohy'
 
 export interface IRdDocFormProps {
   context: FormCustomizerContext
@@ -62,6 +64,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
   const [libName, setLibName] = React.useState<string>('')
   const [fileName, setFileName] = React.useState<string>('')
   const [sourcePage, setSourcePage] = React.useState<string>('')
+  const [currentUser, setCurrentUser] = React.useState<ISiteUserInfo>()
 
   /*const valSet = (value: any, valName: string, valType: ValType = ValType.BASE): void => {
     switch (valType) {
@@ -115,6 +118,12 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
 
       EnsureFolder(PrilohyListId, `${item['Id']}`, props.sp)
       .catch((error) => {
+        console.error(error)
+      })
+
+      props.sp.web.currentUser().then((user) => {
+        setCurrentUser(user)
+      }).catch((error) => {
         console.error(error)
       })
     }
@@ -192,7 +201,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
           <TabPanel value={tabVal} index={0}>
             <form>
               <Stack direction='column' spacing={2} sx={{maxWidth: '30rem'}}>
-                <Stack direction='column' spacing={2}>
+                <Stack direction='column' spacing={3}>
                   <TextCard id='Title' fieldName='Title' item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} />
                   <NumberCard id='acVerzia' fieldName='acVerzia' item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} />
                   <SelectCard id='acStavDokumentu' fieldName='acStavDokumentu' item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} />
@@ -214,22 +223,31 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
             <ListAttachments sp={props.sp} itemId={item['Id']} itemState={'Nový'} setDialog={setDialog} setErrorMessage={setErrorMessage} />
           </TabPanel>
           <TabPanel value={tabVal} index={2}>
-            <PeopleCard sp={props.sp} context={props.context} id='acPripomienkovatelia' fieldName='acPripomienkovatelia'
-              item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
-            <DateCard id='acSchvalDate' fieldName='acSchvalDate' item={item} setItem={setItem} colProps={colProps}
-              dateonly={true} displayMode={props.displayMode} />
+            <Stack direction='column' spacing={2}>
+              <PeopleCard sp={props.sp} context={props.context} id='acPripomienkovatelia' fieldName='acPripomienkovatelia'
+                item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
+              <DateCard id='acSchvalDate' fieldName='acSchvalDate' item={item} setItem={setItem} colProps={colProps}
+                dateonly={true} displayMode={props.displayMode} />
+              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Pripomienkovanie' />
+            </Stack>
           </TabPanel>
           <TabPanel value={tabVal} index={3}>
-            <PeopleCard sp={props.sp} context={props.context} id='acSchvalovatelia' fieldName='acSchvalovatelia'
-              item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
-            <DateCard id='acPripomDate' fieldName='acPripomDate' item={item} setItem={setItem} colProps={colProps}
-              dateonly={true} displayMode={props.displayMode} />
+            <Stack direction='column' spacing={2}>
+              <PeopleCard sp={props.sp} context={props.context} id='acSchvalovatelia' fieldName='acSchvalovatelia'
+                item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
+              <DateCard id='acPripomDate' fieldName='acPripomDate' item={item} setItem={setItem} colProps={colProps}
+                dateonly={true} displayMode={props.displayMode} />
+              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Schvalovanie' />
+            </Stack>
           </TabPanel>
           <TabPanel value={tabVal} index={4}>
-            <PeopleCard sp={props.sp} context={props.context} id='acOboznamovatelia' fieldName='acOboznamovatelia'
-              item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
-            <DateCard id='acOboznaDate' fieldName='acOboznaDate' item={item} setItem={setItem} colProps={colProps}
-              dateonly={true} displayMode={props.displayMode} />
+            <Stack direction='column' spacing={2}>
+              <PeopleCard sp={props.sp} context={props.context} id='acOboznamovatelia' fieldName='acOboznamovatelia'
+                item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
+              <DateCard id='acOboznaDate' fieldName='acOboznaDate' item={item} setItem={setItem} colProps={colProps}
+                dateonly={true} displayMode={props.displayMode} />
+              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Oboznamovanie' />
+            </Stack>
           </TabPanel>
         </Paper>
         <Paper elevation={1} square sx={{flex: 1, padding: '0.5rem', minWidth: '35rem', height: '50rem', margin: '0.2rem'}}>
