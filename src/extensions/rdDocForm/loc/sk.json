@@ -19,7 +19,14 @@
     "LoadingMembers": "Načítavame..."
   },
   "DataDisplays": {
-    "DragNDropUpload": "Potiahnite súbory, alebo stlačte pre nahratie"
+    "DragNDropUpload": "Potiahnite súbory, alebo stlačte pre nahratie",
+    "TaskListTitle": "Úlohy",
+    "SuggestionStateFilter": "Stav:",
+    "SuggestionListTitle": "Pripomienky",
+    "SuggestionEditTitle": "Upraviť Pripomienku",
+    "SuggestionDialogSave": "Uložiť",
+    "ListPageSize": "Veľkosť strany:",
+    "ListPage": "Strana:"
   },
   "Form": {
     "DialogTitleError": "Vyskytly sa chyby počas odosielania formuláru:",

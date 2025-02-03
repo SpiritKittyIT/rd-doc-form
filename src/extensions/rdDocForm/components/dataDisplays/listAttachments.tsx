@@ -23,6 +23,7 @@ interface IListAttachmentsProps {
   itemState: string
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>
   setDialog: React.Dispatch<React.SetStateAction<boolean>>
+  archived: boolean
 }
 
 const ListAttachments: FC<IListAttachmentsProps> = (props) => {
@@ -109,17 +110,20 @@ const ListAttachments: FC<IListAttachmentsProps> = (props) => {
     <>
       <Paper sx={{ padding: 3, maxWidth: 500, margin: "auto", textAlign: "center" }}>
         {/* Drag & Drop Input */}
-        <Box
-          {...getRootProps()}
-          sx={{
-            border: "2px dashed gray",
-            padding: 3,
-            cursor: "pointer",
-          }}
-        >
-          <input {...getInputProps()} />
-          {LocaleStrings.DataDisplays.DragNDropUpload}
-        </Box>
+        {
+          !props.archived &&
+          <Box
+            {...getRootProps()}
+            sx={{
+              border: "2px dashed gray",
+              padding: 3,
+              cursor: "pointer",
+            }}
+          >
+            <input {...getInputProps()} />
+            {LocaleStrings.DataDisplays.DragNDropUpload}
+          </Box>
+        }
 
         {/* File List */}
         <List sx={{ marginTop: 2 }}>
@@ -134,6 +138,7 @@ const ListAttachments: FC<IListAttachmentsProps> = (props) => {
                 },
               }}
               secondaryAction={
+                !props.archived &&
                 <IconButton edge="end" onClick={() => removeAttachment(attachment)} color="error">
                   <DeleteIcon />
                 </IconButton>

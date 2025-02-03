@@ -46,9 +46,44 @@ Short summary on functionality and used technologies.
 - Ensure that you are at the solution folder
 - in the command-line run:
   - **npm install**
+  - **Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass**
   - **gulp serve**
 
 > Include any additional steps as needed.
+
+- To deploy
+  - **gulp clean**
+  - **gulp build**
+  - **gulp bundle --ship**
+  - **gulp package-solution --ship**
+
+- To create app list for the site
+  - **Connect-SPOService -Url https://servisac-admin.sharepoint.com**
+  - **$site = Get-SPOSite https://servisac-admin.sharepoint.com/sites/acRdDokumenty**
+  - **Add-SPOSiteCollectionAppCatalog -Site $site**
+
+- Tutorial to create new Id for the app
+  - **https://www.c-sharpcorner.com/article/deploy-multiple-instance-of-spfx-webpart-in-same-app-catalog/**
+
+- App componentId: bfaa71b6-fe54-4c63-8952-dc4df878cbc4
+
+- Content Type Id: 0x0101007A3267621C1D5F4AAFF76806178A9E4201
+- List Name: acLibRozpracovane | Id: 16e60be6-ef8f-4477-9c2b-3ea1ada91468
+- List Name: acLibPlatne | Id: a19374d6-b9bd-49ca-a808-a73085a7afc6
+- List Name: acLibArchivne | Id: 50f7f4f0-8a38-4890-acf9-a92887454ad7
+
+- To associate the app:
+  - If PnP not installed:
+    - **Install-Module -Name PnP.PowerShell -RequiredVersion 1.11.0**
+    - **Register-PnPManagementShellAccess**
+  - **Connect-PnPOnline -Url https://servisac-admin.sharepoint.com/sites/acRdDokumenty -Interactive**
+  - **$targetList = Get-PnPList -identity "16e60be6-ef8f-4477-9c2b-3ea1ada91468"**
+  - **$targetContentType = get-PnPContentType -List $targetList -Identity "0x0101007A3267621C1D5F4AAFF76806178A9E4201"**
+  - **$targetContentType.DisplayFormClientSideComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"**
+  - **$targetContentType.NewFormClientSideComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"**
+  - **$targetContentType.EditFormClientSideComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"**
+  - **$targetContentType.Update($false)**
+  - **Invoke-PnPQuery**
 
 ## Features
 

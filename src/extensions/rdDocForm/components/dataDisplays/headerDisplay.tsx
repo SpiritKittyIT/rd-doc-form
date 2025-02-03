@@ -18,16 +18,16 @@ interface IHeaderDisplayProps {
 const HeaderDisplay: FC<IHeaderDisplayProps> = (props) => {
 
   const DisplaySteps = (): JSX.Element[] => {
-    const stepNames = ['Návrh']
+    const stepNames = ['Nový']
     let stepPos = 0
-    if (['Spúšťa sa pripomienkovanie...', 'V pripomienkovaní', 'Pripomienky v zapracovaní', 'Spripomienkovaný'].indexOf(props.docState) !== -1) {
+    if (['V pripomienkovaní', 'Spripomienkovaný'].indexOf(props.docState) !== -1) {
       stepNames.push(props.docState)
       stepPos = 1
     }
     else {
       stepNames.push('Pripomienkovanie')
     }
-    if (['Spúšťa sa schvaľovanie...', 'V schvaľovaní', 'Schválený', 'Zamietnutý'].indexOf(props.docState) !== -1) {
+    if (['V schvaľovaní', 'Schválený', 'Zamietnutý'].indexOf(props.docState) !== -1) {
       stepNames.push(props.docState)
       stepPos = 2
     }
@@ -56,7 +56,7 @@ const HeaderDisplay: FC<IHeaderDisplayProps> = (props) => {
     if (completed || active){
       color = 'success'
     }
-    if (['Spúšťa sa pripomienkovanie...', 'Spúšťa sa schvaľovanie...'].indexOf(stepName) !== -1){
+    if (['V pripomienkovaní', 'V schvaľovaní'].indexOf(stepName) !== -1){
       color = 'warning'
     }
     if (['Zamietnutý'].indexOf(stepName) !== -1){

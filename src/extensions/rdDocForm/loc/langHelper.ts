@@ -20,6 +20,13 @@ export interface ILang{
   }
   DataDisplays: {
     DragNDropUpload: string
+    TaskListTitle: string
+    SuggestionStateFilter: string
+    SuggestionListTitle: string
+    SuggestionEditTitle: string
+    SuggestionDialogSave: string
+    ListPageSize: string
+    ListPage: string
   }
   Form: {
     DialogTitleError: string

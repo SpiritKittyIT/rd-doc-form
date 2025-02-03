@@ -7,6 +7,7 @@ import { Box, Checkbox, List, ListItem, ListItemText, MenuItem, Paper, Select, S
 
 import "@pnp/sp/items/get-all"
 import { ISiteUserInfo } from '@pnp/sp/site-users/types'
+import { LocaleStrings } from '../RdDocForm'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -15,6 +16,7 @@ interface IListUlohyProps {
   dokumentId: number
   currentUser?: ISiteUserInfo
   ulohaTyp: 'Pripomienkovanie' | 'Schvalovanie' | 'Oboznamovanie'
+  archived: boolean
 }
 
 interface IListUlohyItemProps {
@@ -25,6 +27,7 @@ interface IListUlohyItemProps {
   pageSize: number
   page: number
   getAll: boolean
+  archived: boolean
 }
 
 const ListUlohyItem: FC<IListUlohyItemProps> = (props) => {
@@ -45,7 +48,7 @@ const ListUlohyItem: FC<IListUlohyItemProps> = (props) => {
       <FormControlLabel
         control={
           <Checkbox
-            disabled={props.item['acKohoId'] !== props.currentUser?.Id}
+            disabled={props.item['acKohoId'] !== props.currentUser?.Id || props.archived}
             checked={checked}
             onChange={(event, newChecked) => {
                 SetChecked(newChecked)
@@ -111,7 +114,7 @@ const ListUlohy: FC<IListUlohyProps> = (props) => {
 
   return (
     <Stack direction='column' spacing={1} >
-      <Typography variant='h5' >Úlohy</Typography>
+      <Typography variant='h5' >{LocaleStrings.DataDisplays.TaskListTitle}</Typography>
       <Box>
         <Paper variant='outlined'>
           <Stack direction='column'>
@@ -124,7 +127,7 @@ const ListUlohy: FC<IListUlohyProps> = (props) => {
               </ListItem>
               {
                 listItems.slice((page - 1) * pageSize, page * pageSize).map((item, index) => <ListUlohyItem key={item['Id']} item={item} index={index} currentUser={props.currentUser}
-                  onTaskCheck={onTaskCheck} pageSize={pageSize} page={page} getAll={getAll} />)
+                  onTaskCheck={onTaskCheck} pageSize={pageSize} page={page} getAll={getAll} archived={props.archived} />)
               }
             </List>
           </Stack>
@@ -148,7 +151,7 @@ const ListUlohy: FC<IListUlohyProps> = (props) => {
 
             {/* Page Input */}
             <Box display="flex" alignItems="center" gap={1} margin='3px'>
-              <Typography>Page:</Typography>
+              <Typography>{LocaleStrings.DataDisplays.ListPage}</Typography>
               <TextField
                 type="number"
                 value={page}
@@ -166,7 +169,7 @@ const ListUlohy: FC<IListUlohyProps> = (props) => {
 
             {/* Page Size Dropdown */}
             <Box display="flex" alignItems="center" gap={1}>
-              <Typography>Page Size:</Typography>
+              <Typography>{LocaleStrings.DataDisplays.ListPageSize}</Typography>
               <Select
                 value={pageSize}
                 onChange={(event) => {

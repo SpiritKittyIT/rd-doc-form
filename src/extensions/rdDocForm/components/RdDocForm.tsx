@@ -21,6 +21,13 @@ import { getLangStrings, ILang } from '../loc/langHelper'
 import ListAttachments from './dataDisplays/listAttachments'
 import { ISiteUserInfo } from '@pnp/sp/site-users/types'
 import ListUlohy from './dataDisplays/listUlohy'
+import ListPripomienky from './dataDisplays/listPripomienky'
+
+export enum DocLib {
+  Rozpracovane = 'acLibRozpracovane',
+  Platne = 'acLibPlatne',
+  Archivne = 'acLibArchivne'
+}
 
 export interface IRdDocFormProps {
   context: FormCustomizerContext
@@ -65,6 +72,8 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
   const [fileName, setFileName] = React.useState<string>('')
   const [sourcePage, setSourcePage] = React.useState<string>('')
   const [currentUser, setCurrentUser] = React.useState<ISiteUserInfo>()
+  const [docLib, setDocLib] = React.useState<DocLib>(DocLib.Rozpracovane)
+  const [displayMode, setDisplayMode] = React.useState<FormDisplayMode>(FormDisplayMode.Display)
 
   /*const valSet = (value: any, valName: string, valType: ValType = ValType.BASE): void => {
     switch (valType) {
@@ -95,7 +104,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
   }
 
   const handleSubmit: (event: React.FormEvent<HTMLButtonElement>) => void = async (event) => {
-    await props.formSubmit(props.sp, item, props.context.list.guid.toString(), props.displayMode, setErrorMessage, setDialog, props.onSave)
+    await props.formSubmit(props.sp, item, props.context.list.guid.toString(), displayMode, setErrorMessage, setDialog, props.onSave)
   }
   //#endregion
 
@@ -104,12 +113,18 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
     const urlParams = new URLSearchParams(window.location.href)
     setSourcePage(urlParams?.get('Source') ?? '')
 
+    const currentDocLib = props.context.list.title as DocLib
+    setDocLib(currentDocLib)
+    if (currentDocLib === DocLib.Rozpracovane) {
+      setDisplayMode(props.displayMode)
+    }
+
     const removeFields = ['@odata.context', '@odata.editLink', '@odata.metadata', '@odata.etag', '@odata.id', '@odata.type',
       'OData__ColorTag', 'OData__dlc_DocId', 'OData__dlc_DocIdUrl', 'OData__CopySource', 'OData__UIVersionString',
       'MediaServiceImageTags', 'MediaServiceOCR', 'acColButtons']
 
     // ensure prilohy folder
-    if (props.displayMode !== FormDisplayMode.New ) {
+    if (displayMode !== FormDisplayMode.New ) {
       const tmpItem = item
       removeFields.forEach(removeField => {
         delete tmpItem[removeField]
@@ -185,7 +200,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
           <Button onClick={() => {setDialog(false)}}>{LocaleStrings.Buttons.DialogClose}</Button>
         </DialogActions>
       </Dialog>
-      <HeaderDisplay libTitle={libName} docTitle={item['Title'] ?? fileName} docState={item['acColStavDokumentu']} />
+      <HeaderDisplay libTitle={libName} docTitle={item['Title'] ?? fileName} docState={item['acStavDokumentu']} />
       <Divider />
       <Stack direction='row' display={'flex'}>
         <Paper elevation={1} square sx={{flex: 1, minHeight: '50rem', margin: '0.2rem'}}>
@@ -193,21 +208,21 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
             <Tabs value={tabVal} onChange={handleChange} variant='scrollable' allowScrollButtonsMobile>
               <Tab label='Hlavné' {...tabProps(0)} />
               <Tab label='Prílohy' {...tabProps(1)} />
-              <Tab label='Pripomienkovanie' {...tabProps(2)} />
-              <Tab label='Schvaľovanie' {...tabProps(3)} />
-              <Tab label='Oboznamovanie' {...tabProps(4)} />
+              {(docLib === DocLib.Rozpracovane || docLib === DocLib.Archivne) && <Tab value={2} label='Pripomienkovanie' {...tabProps(2)} />}
+              {(docLib === DocLib.Rozpracovane || docLib === DocLib.Archivne) && <Tab value={3} label='Schvaľovanie' {...tabProps(3)} />}
+              {(docLib === DocLib.Platne || docLib === DocLib.Archivne) && <Tab value={4} label='Oboznamovanie' {...tabProps(4)} />}
             </Tabs>
           </Box>
           <TabPanel value={tabVal} index={0}>
             <form>
               <Stack direction='column' spacing={2} sx={{maxWidth: '30rem'}}>
                 <Stack direction='column' spacing={3}>
-                  <TextCard id='Title' fieldName='Title' item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} />
-                  <NumberCard id='acVerzia' fieldName='acVerzia' item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} />
-                  <SelectCard id='acStavDokumentu' fieldName='acStavDokumentu' item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} />
+                  <TextCard id='Title' fieldName='Title' item={item} setItem={setItem} colProps={colProps} displayMode={displayMode} />
+                  <NumberCard id='acVerzia' fieldName='acVerzia' item={item} setItem={setItem} colProps={colProps} displayMode={displayMode} />
+                  <SelectCard id='acStavDokumentu' fieldName='acStavDokumentu' item={item} setItem={setItem} colProps={colProps} displayMode={displayMode} />
                 </Stack>
                 <Stack direction='row' spacing={2}>
-                  {props.displayMode === FormDisplayMode.Display
+                  {displayMode === FormDisplayMode.Display
                       ? <Button variant='contained' size='small' color='warning'
                         href={`${props.context.pageContext.web.absoluteUrl}/_layouts/15/SPListForm.aspx?PageType=6&List=${props.context.list.guid}&ID=${props.context.itemId}&Source=${sourcePage}`}
                         >
@@ -220,33 +235,34 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
             </form>
           </TabPanel>
           <TabPanel value={tabVal} index={1}>
-            <ListAttachments sp={props.sp} itemId={item['Id']} itemState={'Nový'} setDialog={setDialog} setErrorMessage={setErrorMessage} />
+            <ListAttachments sp={props.sp} itemId={item['Id']} itemState={'Nový'} setDialog={setDialog} setErrorMessage={setErrorMessage} archived={docLib === DocLib.Archivne} />
           </TabPanel>
           <TabPanel value={tabVal} index={2}>
             <Stack direction='column' spacing={2}>
               <PeopleCard sp={props.sp} context={props.context} id='acPripomienkovatelia' fieldName='acPripomienkovatelia'
-                item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
-              <DateCard id='acSchvalDate' fieldName='acSchvalDate' item={item} setItem={setItem} colProps={colProps}
-                dateonly={true} displayMode={props.displayMode} />
-              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Pripomienkovanie' />
+                item={item} setItem={setItem} colProps={colProps} displayMode={displayMode} multiple />
+              <DateCard id='acPripomDate' fieldName='acPripomDate' item={item} setItem={setItem} colProps={colProps}
+                dateonly={true} displayMode={displayMode} />
+              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Pripomienkovanie' archived={docLib === DocLib.Archivne} />
+              <ListPripomienky sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} archived={docLib === DocLib.Archivne} />
             </Stack>
           </TabPanel>
           <TabPanel value={tabVal} index={3}>
             <Stack direction='column' spacing={2}>
               <PeopleCard sp={props.sp} context={props.context} id='acSchvalovatelia' fieldName='acSchvalovatelia'
-                item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
-              <DateCard id='acPripomDate' fieldName='acPripomDate' item={item} setItem={setItem} colProps={colProps}
-                dateonly={true} displayMode={props.displayMode} />
-              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Schvalovanie' />
+                item={item} setItem={setItem} colProps={colProps} displayMode={displayMode} multiple />
+              <DateCard id='acSchvalDate' fieldName='acSchvalDate' item={item} setItem={setItem} colProps={colProps}
+                dateonly={true} displayMode={displayMode} />
+              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Schvalovanie' archived={docLib === DocLib.Archivne} />
             </Stack>
           </TabPanel>
           <TabPanel value={tabVal} index={4}>
             <Stack direction='column' spacing={2}>
               <PeopleCard sp={props.sp} context={props.context} id='acOboznamovatelia' fieldName='acOboznamovatelia'
-                item={item} setItem={setItem} colProps={colProps} displayMode={props.displayMode} multiple />
+                item={item} setItem={setItem} colProps={colProps} displayMode={displayMode} multiple />
               <DateCard id='acOboznaDate' fieldName='acOboznaDate' item={item} setItem={setItem} colProps={colProps}
-                dateonly={true} displayMode={props.displayMode} />
-              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Oboznamovanie' />
+                dateonly={true} displayMode={displayMode} />
+              <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Oboznamovanie' archived={docLib === DocLib.Archivne} />
             </Stack>
           </TabPanel>
         </Paper>
