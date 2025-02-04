@@ -19,7 +19,7 @@ import DeleteIcon from "@mui/icons-material/Close"; // Close (delete) icon
 
 interface IListAttachmentsProps {
   sp: SPFI
-  itemId: number
+  dokId: number
   itemState: string
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>
   setDialog: React.Dispatch<React.SetStateAction<boolean>>
@@ -30,7 +30,7 @@ const ListAttachments: FC<IListAttachmentsProps> = (props) => {
   const [attachments, setAttachments] = React.useState<IFileInfo[]>([])
 
   const getAttachments = (): void => {
-    props.sp.web.lists.getById(PrilohyListId).rootFolder.folders.getByUrl(`${props.itemId}`).files()
+    props.sp.web.lists.getById(PrilohyListId).rootFolder.folders.getByUrl(`${props.dokId}`).files()
     .then((files) => {
       setAttachments(files)
     }).catch((error) => {
@@ -46,7 +46,7 @@ const ListAttachments: FC<IListAttachmentsProps> = (props) => {
   const onDrop = React.useCallback(async (files) => {
     for (const file of files) {
       await props.sp.web.lists.getById(PrilohyListId)
-      .rootFolder.folders.getByUrl(`${props.itemId}`).files.getByUrl(file.name)().then((file) => {
+      .rootFolder.folders.getByUrl(`${props.dokId}`).files.getByUrl(file.name)().then((file) => {
         // found pre existing file
         props.setErrorMessage(`Súbor ${file.Name} už existuje ako príloha pre tento dokument. Pre to ho nie je možné pridať.`)
         props.setDialog(true)
@@ -54,7 +54,7 @@ const ListAttachments: FC<IListAttachmentsProps> = (props) => {
         // no existing file with same name
         console.log(reason)
         await props.sp.web.lists.getById(PrilohyListId)
-          .rootFolder.folders.getByUrl(`${props.itemId}`).files.addChunked(file.name, file, undefined, true)
+          .rootFolder.folders.getByUrl(`${props.dokId}`).files.addChunked(file.name, file, undefined, true)
           .then(async (fileItem) => {
           }).catch((error) => {
             console.error(error)

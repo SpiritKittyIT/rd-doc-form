@@ -235,7 +235,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
             </form>
           </TabPanel>
           <TabPanel value={tabVal} index={1}>
-            <ListAttachments sp={props.sp} itemId={item['Id']} itemState={'Nový'} setDialog={setDialog} setErrorMessage={setErrorMessage} archived={docLib === DocLib.Archivne} />
+            <ListAttachments sp={props.sp} dokId={item['acDokId']} itemState={'Nový'} setDialog={setDialog} setErrorMessage={setErrorMessage} archived={docLib === DocLib.Archivne} />
           </TabPanel>
           <TabPanel value={tabVal} index={2}>
             <Stack direction='column' spacing={2}>
