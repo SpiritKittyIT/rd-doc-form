@@ -24,9 +24,9 @@ import ListUlohy from './dataDisplays/listUlohy'
 import ListPripomienky from './dataDisplays/listPripomienky'
 
 export enum DocLib {
-  Rozpracovane = 'acLibRozpracovane',
-  Platne = 'acLibPlatne',
-  Archivne = 'acLibArchivne'
+  Rozpracovane = '16e60be6-ef8f-4477-9c2b-3ea1ada91468',
+  Platne = 'a19374d6-b9bd-49ca-a808-a73085a7afc6',
+  Archivne = '50f7f4f0-8a38-4890-acf9-a92887454ad7'
 }
 
 export interface IRdDocFormProps {
@@ -113,7 +113,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
     const urlParams = new URLSearchParams(window.location.href)
     setSourcePage(urlParams?.get('Source') ?? '')
 
-    const currentDocLib = props.context.list.title as DocLib
+    const currentDocLib = props.context.list.guid.toString() as DocLib
     setDocLib(currentDocLib)
     if (currentDocLib === DocLib.Rozpracovane) {
       setDisplayMode(props.displayMode)
