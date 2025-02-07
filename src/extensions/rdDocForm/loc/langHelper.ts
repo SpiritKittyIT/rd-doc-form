@@ -45,6 +45,6 @@ export const getLangStrings = (locale: string): ILang => {
     case 'sk':
       return require(/* webpackChunkName: 'lang' */'./sk.json')
     default:
-      return require(/* webpackChunkName: 'lang' */'./en.json')
+      return require(/* webpackChunkName: 'lang' */'./sk.json')
   }
 }
