@@ -68,7 +68,6 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
   const [colProps, setColProps] = React.useState<Record<string, IColProps>>({})
   const [dialog, setDialog] = React.useState<boolean>(false)
   const [errorMessage, setErrorMessage] = React.useState<string>('')
-  const [libName, setLibName] = React.useState<string>('')
   const [fileName, setFileName] = React.useState<string>('')
   const [sourcePage, setSourcePage] = React.useState<string>('')
   const [currentUser, setCurrentUser] = React.useState<ISiteUserInfo>()
@@ -162,13 +161,6 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
       console.error(err)
     })
 
-    //set lib name
-    props.sp.web.lists.getById(props.context.list.guid.toString())().then((list) => {
-      setLibName(list.Title)
-    }).catch((error) => {
-      console.error(error)
-    })
-
     props.sp.web.lists.getById(props.context.list.guid.toString()).items.getById(item['Id']).select('File/Name', 'File/Title').expand('File')().then((res) => {
       setFileName(res['File']['Name'])
       if (!item['Title']) {
@@ -183,6 +175,17 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
 
   }, [])
   //#endregion
+
+  const getLibName = (): string => {
+    switch (docLib) {
+      case DocLib.Rozpracovane:
+        return "Rozpracované"
+      case DocLib.Platne:
+        return "Platné"
+      default:
+        return "Archívne"
+    }
+  }
 
   return (
     <>
@@ -200,7 +203,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
           <Button onClick={() => {setDialog(false)}}>{LocaleStrings.Buttons.DialogClose}</Button>
         </DialogActions>
       </Dialog>
-      <HeaderDisplay libTitle={libName} docTitle={item['Title'] ?? fileName} docState={item['acStavDokumentu']} />
+      <HeaderDisplay libTitle={getLibName()} docTitle={item['Title'] ?? fileName} docState={item['acStavDokumentu']} />
       <Divider />
       <Stack direction='row' display={'flex'}>
         <Paper elevation={1} square sx={{flex: 1, minHeight: '50rem', margin: '0.2rem'}}>

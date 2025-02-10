@@ -9,6 +9,7 @@ import "@pnp/sp/items/get-all"
 import { ISiteUserInfo } from '@pnp/sp/site-users/types'
 
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import AddIcon from '@mui/icons-material/Add'
 import { LocaleStrings } from '../RdDocForm'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -92,7 +93,20 @@ const ListPripomienky: FC<IListPripomienkyProps> = (props) => {
 
   const onPripoSave = (): void => {
     if (!pripomItem) { return }
-    auditSp?.web.lists.getById(listId).items.getById(pripomItem['Id']).update({['acPripomStav']: pripomItem['acPripomStav']})
+    if (pripomItem['Id'] === undefined) {
+      auditSp?.web.lists.getById(listId).items.add(pripomItem)
+      .then(() => {
+      }).catch((error) => {
+        console.error(error)
+      })
+      return
+    }
+    auditSp?.web.lists.getById(listId).items.getById(pripomItem['Id']).update(
+      {
+        ['acPripomStav']: pripomItem['acPripomStav'],
+        ['Title']: pripomItem['Title']
+      }
+    )
     .then(() => {
     }).catch((error) => {
       console.error(error)
@@ -115,12 +129,12 @@ const ListPripomienky: FC<IListPripomienkyProps> = (props) => {
         onClose={() => {setShowDialog(false)}}
       >
         <DialogTitle>
-          {LocaleStrings.DataDisplays.SuggestionEditTitle}
+          {pripomItem && pripomItem['Id'] === undefined ? 'Nová pripomienka' : LocaleStrings.DataDisplays.SuggestionEditTitle}
         </DialogTitle>
         <DialogContent sx={{ width: 400 }}>
           <Stack direction='column' spacing={2} >
             <TextField
-              disabled
+              disabled={pripomItem && pripomItem['Id'] === undefined ? false : true}
               value={pripomItem ? pripomItem['Title'] : ''}
               multiline
             />
@@ -157,7 +171,23 @@ const ListPripomienky: FC<IListPripomienkyProps> = (props) => {
         </DialogActions>
       </Dialog>
       <Stack direction='column' spacing={1} >
-        <Typography variant='h5' >{LocaleStrings.DataDisplays.SuggestionListTitle}</Typography>
+        <Stack direction='row' spacing={2} >
+          <Typography variant='h5' >{LocaleStrings.DataDisplays.SuggestionListTitle}</Typography>
+          {
+            !props.archived &&
+            <IconButton
+              title={'Nová pripomienka'}
+              size='small'
+              color='primary'
+              sx={{ border: '2px solid', borderRadius: 2, width: 26, height: 26 }}
+              onClick={(event) => {
+                setPripomItem({ ['acDokId']: props.dokumentId })
+                setShowDialog(true)
+            }}>
+              <AddIcon />
+            </IconButton>
+          }
+        </Stack>
         <Box>
           <Paper variant='outlined'>
             <Stack direction='column'>

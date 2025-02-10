@@ -85,6 +85,45 @@ Short summary on functionality and used technologies.
   - **$targetContentType.Update($false)**
   - **Invoke-PnPQuery**
 
+## instal
+
+// Replace these values with your own:
+const listId = "16e60be6-ef8f-4477-9c2b-3ea1ada91468"; 
+const formUrl = "DispForm.aspx"; // Or "EditForm.aspx"/"DispForm.aspx"
+const customizerComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"; // From manifest
+
+const digestResponse = await fetch(`${_spPageContextInfo.webAbsoluteUrl}/_api/contextinfo`, {
+  method: "POST",
+  headers: {
+    "Accept": "application/json;odata=verbose",
+    "Content-Type": "application/json;odata=verbose"
+  }
+});
+
+const digestData = await digestResponse.json();
+const requestDigest = digestData.d.GetContextWebInformation.FormDigestValue;
+
+const payload = {
+  ClientSideComponentId: customizerComponentId,
+  ClientSideComponentProperties: "{}" // You can pass JSON stringified props if needed
+};
+
+const updateResponse = await fetch(
+  `${_spPageContextInfo.webAbsoluteUrl}/_api/web/lists('${listId}')/Forms('${formUrl}')`, 
+  {
+    method: "POST",
+    headers: {
+      "Accept": "application/json;odata=verbose",
+      "Content-Type": "application/json;odata=verbose",
+      "X-RequestDigest": requestDigest, // Use dynamically retrieved digest token
+      "IF-MATCH": "*",
+      "X-HTTP-Method": "MERGE"
+    },
+    body: JSON.stringify(payload)
+  }
+);
+
+
 ## Features
 
 Description of the extension that expands upon high-level summary above.
