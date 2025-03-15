@@ -76,12 +76,30 @@ Short summary on functionality and used technologies.
   - If PnP not installed:
     - **Install-Module -Name PnP.PowerShell -RequiredVersion 1.11.0**
     - **Register-PnPManagementShellAccess**
-  - **Connect-PnPOnline -Url https://servisac-admin.sharepoint.com/sites/acRdDokumenty -Interactive**
-  - **$targetList = Get-PnPList -identity "16e60be6-ef8f-4477-9c2b-3ea1ada91468"**
-  - **$targetContentType = get-PnPContentType -List $targetList -Identity "0x0101007A3267621C1D5F4AAFF76806178A9E4201"**
-  - **$targetContentType.DisplayFormClientSideComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"**
-  - **$targetContentType.NewFormClientSideComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"**
-  - **$targetContentType.EditFormClientSideComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"**
+
+  - **$SiteURL = "https://servisac.sharepoint.com/sites/acRdDokumenty"**
+  - **$ComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"**
+  - **$ContentTypeId = "0x0101007A3267621C1D5F4AAFF76806178A9E4201"**
+  
+  - **Connect-PnPOnline -Interactive -Url $SiteURL**
+  
+  - **#acLibRozpracovane**
+  - **$LibId = "16e60be6-ef8f-4477-9c2b-3ea1ada91468"**
+  - **$ContentTypeId = "0x0101007A3267621C1D5F4AAFF76806178A9E420100C5F6E3EC31736F40B07DF8847CDD38E3"**
+  
+  - **#LibPlatne**
+  - **$LibId = "a19374d6-b9bd-49ca-a808-a73085a7afc6"**
+  - **$ContentTypeId = "0x0101007A3267621C1D5F4AAFF76806178A9E420100D377A0F795415047A92C50D743011398"**
+  
+  - **#LibArchivne**
+  - **$LibId = "50f7f4f0-8a38-4890-acf9-a92887454ad7"**
+  - **$ContentTypeId = "0x0101007A3267621C1D5F4AAFF76806178A9E4201009E8C739BAA64B84897E078085921AD24"**
+  
+  - **$targetList = Get-PnPList -identity $LibId**
+  - **$targetContentType = get-PnPContentType -List $targetList -Identity $ContentTypeId**
+  - **$targetContentType.DisplayFormClientSideComponentId = $ComponentId**
+  - **$targetContentType.NewFormClientSideComponentId = $ComponentId**
+  - **$targetContentType.EditFormClientSideComponentId = $ComponentId**
   - **$targetContentType.Update($false)**
   - **Invoke-PnPQuery**
 
