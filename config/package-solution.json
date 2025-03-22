@@ -3,7 +3,7 @@
   "solution": {
     "name": "rd-doc-form-client-side-solution",
     "id": "bfaa71b6-fe54-4c63-8952-dc4df878cbc4",
-    "version": "1.0.0.6",
+    "version": "1.0.0.8",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,

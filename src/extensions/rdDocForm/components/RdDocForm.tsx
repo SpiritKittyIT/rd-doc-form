@@ -76,6 +76,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
   const [currentUser, setCurrentUser] = React.useState<ISiteUserInfo>()
   const [docLib, setDocLib] = React.useState<DocLib>(DocLib.Rozpracovane)
   const [displayMode, setDisplayMode] = React.useState<FormDisplayMode>(FormDisplayMode.Display)
+  const [displayModeO, setDisplayModeO] = React.useState<FormDisplayMode>(FormDisplayMode.Display)
 
   /*const valSet = (value: any, valName: string, valType: ValType = ValType.BASE): void => {
     switch (valType) {
@@ -120,6 +121,11 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
     setDocLib(currentDocLib)
     if (currentDocLib === DocLib.Rozpracovane) {
       setDisplayMode(props.displayMode)
+      setDisplayModeO(props.displayMode)
+    }
+    if (currentDocLib === DocLib.Platne) {
+      setDisplayMode(FormDisplayMode.Display)
+      setDisplayModeO(props.displayMode)
     }
 
     const removeFields = ['@odata.context', '@odata.editLink', '@odata.metadata', '@odata.etag', '@odata.id', '@odata.type',
@@ -230,7 +236,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
                 </Stack>
                 <Stack direction='row' spacing={2}>
                   {
-                    displayMode === FormDisplayMode.Display && docLib === DocLib.Rozpracovane &&
+                    props.displayMode === FormDisplayMode.Display && docLib !== DocLib.Archivne &&
                     <Button variant='contained' size='small' color='warning'
                       href={`${props.context.pageContext.web.absoluteUrl}/_layouts/15/SPListForm.aspx?PageType=6&List=${props.context.list.guid}&ID=${props.context.itemId}&Source=${sourcePage}`}
                     >
@@ -238,7 +244,7 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
                     </Button>
                   }
                   {
-                    displayMode !== FormDisplayMode.Display && docLib === DocLib.Rozpracovane &&
+                    props.displayMode !== FormDisplayMode.Display && docLib !== DocLib.Archivne &&
                       <Button variant='contained' size='small' color='success' onClick={handleSubmit}>{LocaleStrings.Buttons.Save}</Button>
                   }
                   <Button variant='contained' size='small' color='error' onClick={() => {props.onClose()}}>{LocaleStrings.Buttons.Close}</Button>
@@ -271,9 +277,9 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
           <TabPanel value={tabVal} index={4}>
             <Stack direction='column' spacing={2}>
               <PeopleCard sp={props.sp} context={props.context} id='acOboznamovatelia' fieldName='acOboznamovatelia'
-                item={item} setItem={setItem} colProps={colProps} displayMode={displayMode} multiple />
+                item={item} setItem={setItem} colProps={colProps} displayMode={displayModeO} multiple />
               <DateCard id='acOboznaDate' fieldName='acOboznaDate' item={item} setItem={setItem} colProps={colProps}
-                dateonly={true} displayMode={displayMode} />
+                dateonly={true} displayMode={displayModeO} />
               <ListUlohy sp={props.sp} dokumentId={item['Id']} currentUser={currentUser} ulohaTyp='Oboznamovanie' archived={docLib === DocLib.Archivne} />
             </Stack>
           </TabPanel>
