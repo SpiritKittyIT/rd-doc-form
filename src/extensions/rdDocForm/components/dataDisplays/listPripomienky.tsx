@@ -10,7 +10,7 @@ import { ISiteUserInfo } from '@pnp/sp/site-users/types'
 
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import AddIcon from '@mui/icons-material/Add'
-import { LocaleStrings } from '../RdDocForm'
+import { auditSiteUrl, LocaleStrings, pripoListId } from '../RdDocForm'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -67,8 +67,6 @@ const ListPripomienkyItem: FC<IListPripomienkyItemProps> = (props) => {
 }
 
 const ListPripomienky: FC<IListPripomienkyProps> = (props) => {
-  const auditSiteUrl: string = 'https://servisac.sharepoint.com/sites/acRdAudit'
-  const listId = '9fda23eb-cfec-40f1-9f66-500d41c0a898'
   const pageSizes = [5, 10, 20, 50]
   const pripomChoices = ['', 'Nezapracované', 'Zapracované', 'Zamietnuté']
 
@@ -81,7 +79,7 @@ const ListPripomienky: FC<IListPripomienkyProps> = (props) => {
   const [pripomItem, setPripomItem] = React.useState<Record<string, any>>()
 
   const getListItems = (stav: string): void => {
-    auditSp?.web.lists.getById(listId)
+    auditSp?.web.lists.getById(pripoListId)
       .items.filter(`acDokId eq '${props.dokumentId}'${stav === '' ? `` : ` and acPripomStav eq '${stav}'`}`)
       .select('*', 'Author/Title').expand('Author').orderBy('Id').getAll()
       .then((newListItems: Record<string, any>[]) => {
@@ -94,20 +92,22 @@ const ListPripomienky: FC<IListPripomienkyProps> = (props) => {
   const onPripoSave = (): void => {
     if (!pripomItem) { return }
     if (pripomItem['Id'] === undefined) {
-      auditSp?.web.lists.getById(listId).items.add(pripomItem)
+      auditSp?.web.lists.getById(pripoListId).items.add(pripomItem)
       .then(() => {
+        getListItems(pripomStav)
       }).catch((error) => {
         console.error(error)
       })
       return
     }
-    auditSp?.web.lists.getById(listId).items.getById(pripomItem['Id']).update(
+    auditSp?.web.lists.getById(pripoListId).items.getById(pripomItem['Id']).update(
       {
         ['acPripomStav']: pripomItem['acPripomStav'],
         ['Title']: pripomItem['Title']
       }
     )
     .then(() => {
+      getListItems(pripomStav)
     }).catch((error) => {
       console.error(error)
     })
@@ -136,6 +136,14 @@ const ListPripomienky: FC<IListPripomienkyProps> = (props) => {
             <TextField
               disabled={pripomItem && pripomItem['Id'] === undefined ? false : true}
               value={pripomItem ? pripomItem['Title'] : ''}
+              onChange={(event) => {
+                if (pripomItem === undefined || pripomItem['Id'] === undefined) {
+                  setPripomItem({
+                    ...pripomItem,
+                    ['Title']: event.target.value
+                  })
+                }
+              }}
               multiline
             />
             <Select

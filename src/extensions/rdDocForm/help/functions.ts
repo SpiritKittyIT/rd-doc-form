@@ -88,20 +88,15 @@ export async function getSiteUsersAndGroups(sp: SPFI, context: FormCustomizerCon
     const members: IMember[] = []
     const client: MSGraphClientV3 = await context.msGraphClientFactory.getClient('3')
 
-    // Build filter query for users
+    const requests: Promise<IWebEnsureUserResult>[] = []
+
+    // Fetch users
     const userFilterQuery = filter ? `startswith(displayName, '${filter}')` : ''
-    
-    // Fetch users with Graph API
     const usersResponse = await client.api(`/users`).filter(userFilterQuery).top(20).get()
 
     for (const user of usersResponse.value) {
       const loginName = 'i:0#.f|membership|' + user.userPrincipalName;
-      try {
-        const result: IWebEnsureUserResult = await sp.web.ensureUser(loginName)
-        members.push({id: result.data.Id, name: result.data.Title})
-      } catch (err) {
-        console.error(err)
-      }
+      requests.push(sp.web.ensureUser(loginName))
     }
 
     // Fetch groups if includeGroups is true
@@ -111,12 +106,16 @@ export async function getSiteUsersAndGroups(sp: SPFI, context: FormCustomizerCon
 
       for (const group of groupsResponse.value) {
         const loginName = 'c:0o.c|federateddirectoryclaimprovider|' + group.id;
-        try {
-          const result: IWebEnsureUserResult = await sp.web.ensureUser(loginName)
-          members.push({id: result.data.Id, name: result.data.Title})
-        } catch (err) {
-          console.error(err)
-        }
+        requests.push(sp.web.ensureUser(loginName))
+      }
+    }
+
+    for (const request of requests) {
+      try {
+        const result = await request
+        members.push({id: result.data.Id, name: result.data.Title})
+      } catch (err) {
+        console.error(err)
       }
     }
 

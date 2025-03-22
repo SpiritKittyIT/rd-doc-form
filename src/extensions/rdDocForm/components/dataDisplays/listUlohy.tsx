@@ -7,7 +7,7 @@ import { Box, Checkbox, List, ListItem, ListItemText, MenuItem, Paper, Select, S
 
 import "@pnp/sp/items/get-all"
 import { ISiteUserInfo } from '@pnp/sp/site-users/types'
-import { LocaleStrings } from '../RdDocForm'
+import { auditSiteUrl, LocaleStrings, ulohyListId } from '../RdDocForm'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -71,8 +71,6 @@ const ListUlohyItem: FC<IListUlohyItemProps> = (props) => {
 }
 
 const ListUlohy: FC<IListUlohyProps> = (props) => {
-  const auditSiteUrl: string = 'https://servisac.sharepoint.com/sites/acRdAudit'
-  const listId = '4daa10c2-f4c1-40ba-bd40-22b483d99631'
   const pageSizes = [5, 10, 20, 50]
 
   const [auditSp, setAuditSp] = React.useState<SPFI>()
@@ -82,7 +80,7 @@ const ListUlohy: FC<IListUlohyProps> = (props) => {
   const [getAll, setGetAll] = React.useState<boolean>(false)
 
   const getListItems = (all: boolean): void => {
-    auditSp?.web.lists.getById(listId)
+    auditSp?.web.lists.getById(ulohyListId)
       .items.filter(`acDokId eq '${props.dokumentId}' and acUlohaTyp eq '${props.ulohaTyp}'${all ? `` : `and acKohoId eq ${props.currentUser?.Id}`}`)
       .select('*', 'acKoho/Title', 'acKoho/Id').expand('acKoho').orderBy('Id').getAll()
       .then((newListItems: Record<string, any>[]) => {
@@ -93,7 +91,7 @@ const ListUlohy: FC<IListUlohyProps> = (props) => {
   }
 
   const onTaskCheck = (checked: boolean, taskId: number): void => {
-    auditSp?.web.lists.getById(listId).items.getById(taskId).update({['acSplnene']: checked})
+    auditSp?.web.lists.getById(ulohyListId).items.getById(taskId).update({['acSplnene']: checked})
     .then(() => {
       getListItems(getAll)
     }).catch((error) => {

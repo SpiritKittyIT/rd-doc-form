@@ -24,9 +24,9 @@ import ListUlohy from './dataDisplays/listUlohy'
 import ListPripomienky from './dataDisplays/listPripomienky'
 
 export enum DocLib {
-  Rozpracovane = '16e60be6-ef8f-4477-9c2b-3ea1ada91468',
-  Platne = 'a19374d6-b9bd-49ca-a808-a73085a7afc6',
-  Archivne = '50f7f4f0-8a38-4890-acf9-a92887454ad7'
+  Rozpracovane = 'acLibRozpracovane',
+  Platne = 'acLibPlatne',
+  Archivne = 'acLibArchivne'
 }
 
 export interface IRdDocFormProps {
@@ -47,10 +47,13 @@ export interface IRdDocFormProps {
   sp: SPFI
 }
 
-export const LocaleStrings: ILang = getLangStrings('sk')
-
 const LOG_SOURCE: string = 'RdDocForm'
-export const PrilohyListId: string = '7d968a1b-aab4-4294-af58-5d401e887779'
+
+export const LocaleStrings: ILang = getLangStrings('sk')
+export const PrilohyListId: string = '6fea0f4a-8477-41b0-86be-16bad3258edd'
+export const auditSiteUrl: string = 'https://servisac.sharepoint.com/sites/acRdAudit'
+export const pripoListId: string = '9fda23eb-cfec-40f1-9f66-500d41c0a898'
+export const ulohyListId: string = '4daa10c2-f4c1-40ba-bd40-22b483d99631'
 
 /*enum ValType {
   BASE,
@@ -112,7 +115,8 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
     const urlParams = new URLSearchParams(window.location.href)
     setSourcePage(urlParams?.get('Source') ?? '')
 
-    const currentDocLib = props.context.list.guid.toString() as DocLib
+    const currentDocLib = props.context.list.serverRelativeUrl.split('/').pop() as DocLib
+    console.log(props.context.list.serverRelativeUrl)
     setDocLib(currentDocLib)
     if (currentDocLib === DocLib.Rozpracovane) {
       setDisplayMode(props.displayMode)
@@ -225,13 +229,18 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
                   <SelectCard id='acStavDokumentu' fieldName='acStavDokumentu' item={item} setItem={setItem} colProps={colProps} displayMode={displayMode} />
                 </Stack>
                 <Stack direction='row' spacing={2}>
-                  {displayMode === FormDisplayMode.Display
-                      ? <Button variant='contained' size='small' color='warning'
-                        href={`${props.context.pageContext.web.absoluteUrl}/_layouts/15/SPListForm.aspx?PageType=6&List=${props.context.list.guid}&ID=${props.context.itemId}&Source=${sourcePage}`}
-                        >
-                          {LocaleStrings.Buttons.Edit}
-                        </Button>
-                      : <Button variant='contained' size='small' color='success' onClick={handleSubmit}>{LocaleStrings.Buttons.Save}</Button>}
+                  {
+                    displayMode === FormDisplayMode.Display && docLib === DocLib.Rozpracovane &&
+                    <Button variant='contained' size='small' color='warning'
+                      href={`${props.context.pageContext.web.absoluteUrl}/_layouts/15/SPListForm.aspx?PageType=6&List=${props.context.list.guid}&ID=${props.context.itemId}&Source=${sourcePage}`}
+                    >
+                      {LocaleStrings.Buttons.Edit}
+                    </Button>
+                  }
+                  {
+                    displayMode !== FormDisplayMode.Display && docLib === DocLib.Rozpracovane &&
+                      <Button variant='contained' size='small' color='success' onClick={handleSubmit}>{LocaleStrings.Buttons.Save}</Button>
+                  }
                   <Button variant='contained' size='small' color='error' onClick={() => {props.onClose()}}>{LocaleStrings.Buttons.Close}</Button>
                 </Stack>
               </Stack>

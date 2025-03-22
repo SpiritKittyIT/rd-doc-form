@@ -65,43 +65,24 @@ Short summary on functionality and used technologies.
 - Tutorial to create new Id for the app
   - **https://www.c-sharpcorner.com/article/deploy-multiple-instance-of-spfx-webpart-in-same-app-catalog/**
 
-- App componentId: bfaa71b6-fe54-4c63-8952-dc4df878cbc4
-
-- Content Type Id: 0x0101007A3267621C1D5F4AAFF76806178A9E4201
-- List Name: acLibRozpracovane | Id: 16e60be6-ef8f-4477-9c2b-3ea1ada91468
-- List Name: acLibPlatne | Id: a19374d6-b9bd-49ca-a808-a73085a7afc6
-- List Name: acLibArchivne | Id: 50f7f4f0-8a38-4890-acf9-a92887454ad7
-
 - To associate the app:
   - If PnP not installed:
-    - **Install-Module -Name PnP.PowerShell -RequiredVersion 1.11.0**
+    - **Install-Module -Name PnP.PowerShell**
     - **Register-PnPManagementShellAccess**
 
   - **$SiteURL = "https://servisac.sharepoint.com/sites/acRdDokumenty"**
-  - **$ComponentId = "bfaa71b6-fe54-4c63-8952-dc4df878cbc4"**
+  - **$ComponentId = "70d19e70-0632-41b8-a02c-d5e7f42a600e"**
   - **$ContentTypeId = "0x0101007A3267621C1D5F4AAFF76806178A9E4201"**
+  - **$ClientID = ""**
   
-  - **Connect-PnPOnline -Interactive -Url $SiteURL**
+  - **Connect-PnPOnline -Interactive -Url $SiteURL -ClientId $ClientID**
   
-  - **#acLibRozpracovane**
-  - **$LibId = "16e60be6-ef8f-4477-9c2b-3ea1ada91468"**
-  - **$ContentTypeId = "0x0101007A3267621C1D5F4AAFF76806178A9E420100C5F6E3EC31736F40B07DF8847CDD38E3"**
-  
-  - **#LibPlatne**
-  - **$LibId = "a19374d6-b9bd-49ca-a808-a73085a7afc6"**
-  - **$ContentTypeId = "0x0101007A3267621C1D5F4AAFF76806178A9E420100D377A0F795415047A92C50D743011398"**
-  
-  - **#LibArchivne**
-  - **$LibId = "50f7f4f0-8a38-4890-acf9-a92887454ad7"**
-  - **$ContentTypeId = "0x0101007A3267621C1D5F4AAFF76806178A9E4201009E8C739BAA64B84897E078085921AD24"**
-  
-  - **$targetList = Get-PnPList -identity $LibId**
-  - **$targetContentType = get-PnPContentType -List $targetList -Identity $ContentTypeId**
-  - **$targetContentType.DisplayFormClientSideComponentId = $ComponentId**
-  - **$targetContentType.NewFormClientSideComponentId = $ComponentId**
-  - **$targetContentType.EditFormClientSideComponentId = $ComponentId**
-  - **$targetContentType.Update($false)**
-  - **Invoke-PnPQuery**
+  - **$CTName = "acCtDokument"**
+  - **$LibName = "acLibRozpracovane"**
+  - **$LibName = "acLibPlatne"**
+  - **$LibName = "acLibArchivne"**
+
+  - **Set-PnPContentType -Identity $CTName -List $LibName -NewFormClientSideComponentId $ComponentId -EditFormClientSideComponentId $ComponentId -DisplayFormClientSideComponentId $ComponentId**
 
 ## instal
 
