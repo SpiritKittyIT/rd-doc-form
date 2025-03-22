@@ -107,7 +107,11 @@ const RdDocForm: React.FC<IRdDocFormProps> = (props) => {
   }
 
   const handleSubmit: (event: React.FormEvent<HTMLButtonElement>) => void = async (event) => {
-    await props.formSubmit(props.sp, item, props.context.list.guid.toString(), displayMode, setErrorMessage, setDialog, props.onSave)
+    let dm = displayMode
+    if (displayModeO === FormDisplayMode.Edit) {
+      dm = displayModeO
+    }
+    await props.formSubmit(props.sp, item, props.context.list.guid.toString(), dm, setErrorMessage, setDialog, props.onSave)
   }
   //#endregion
 
